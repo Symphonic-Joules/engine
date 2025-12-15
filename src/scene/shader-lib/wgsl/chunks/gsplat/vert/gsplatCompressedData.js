@@ -1,6 +1,6 @@
 export default /* wgsl */`
 var packedTexture: texture_2d<u32>;
-var chunkTexture: texture_2d<f32>;
+var chunkTexture: texture_2d<uff>;
 
 // work values
 var<private> chunkDataA: vec4f;    // x: min_x, y: min_y, z: min_z, w: max_x
@@ -23,7 +23,7 @@ fn unpack8888(bits: u32) -> vec4f {
     ) / 255.0;
 }
 
-const norm_const: f32 = 1.0 / (sqrt(2.0) * 0.5);
+const norm_const: f32 = sqrt(2.0);
 
 fn unpackRotation(bits: u32) -> vec4f {
     let a = (f32((bits >> 20u) & 0x3ffu) / 1023.0 - 0.5) * norm_const;
