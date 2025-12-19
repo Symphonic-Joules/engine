@@ -154,13 +154,65 @@ WbDataScrumb.prototype.scrubAndNotify = function (data, eventName) {
 };
 
 /**
+ * Deeply clones a value, preserving Dates and handling circular references.
+ * Note: Functions and non-enumerable properties are copied by reference.
+ * @param {*} value - The value to clone
+ * @param {WeakMap<object, *>} [seen] - Internal map to handle circular references
+ * @returns {*} A deep clone of the provided value
+ */
+WbDataScrumb.prototype._deepClone = function (value, seen) {
+    // Primitives and null are returned as-is
+    if (value === null || typeof value !== 'object') {
+        return value;
+    }
+
+    // Initialize the WeakMap for tracking circular references
+    if (!seen) {
+        seen = new WeakMap();
+    }
+
+    // Return existing clone if we've already seen this object
+    if (seen.has(value)) {
+        return seen.get(value);
+    }
+
+    // Preserve Date instances
+    if (value instanceof Date) {
+        return new Date(value.getTime());
+    }
+
+    var cloned;
+
+    // Handle arrays
+    if (Array.isArray(value)) {
+        cloned = [];
+        seen.set(value, cloned);
+        for (var i = 0; i < value.length; i++) {
+            cloned[i] = this._deepClone(value[i], seen);
+        }
+        return cloned;
+    }
+
+    // Handle plain objects
+    cloned = {};
+    seen.set(value, cloned);
+    var keys = Object.keys(value);
+    for (var k = 0; k < keys.length; k++) {
+        var key = keys[k];
+        cloned[key] = this._deepClone(value[key], seen);
+    }
+
+    return cloned;
+};
+
+/**
  * Creates a copy of the data before scrubbing (non-destructive)
  * @param {*} data - The data to scrub
  * @returns {*} A scrubbed copy of the data
  */
 WbDataScrumb.prototype.scrubCopy = function (data) {
-    // Deep clone the data first
-    var copy = JSON.parse(JSON.stringify(data));
+    // Deep clone the data first using a robust cloning method
+    var copy = this._deepClone(data);
     return this.scrubData(copy);
 };
 
