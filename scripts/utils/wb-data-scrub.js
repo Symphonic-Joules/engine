@@ -59,10 +59,16 @@ WbDataScrumb.prototype.initialize = function () {
 };
 
 /**
- * Scrubs/sanitizes a data object according to configured rules
- * @param {*} data - The data to scrub (can be object, array, or primitive)
- * @param {number} depth - Current recursion depth (internal use)
- * @returns {*} The scrubbed data
+ * Scrubs/sanitizes a data value according to configured rules.
+ *
+ * Plain objects and arrays are traversed recursively and their primitive
+ * properties are scrubbed based on the configured options. Values such as
+ * functions, Date instances, RegExp objects, DOM nodes, and other non-plain
+ * objects are not modified and are returned as-is.
+ *
+ * @param {*} data - The data to scrub (object, array, or primitive).
+ * @param {number} [depth] - Current recursion depth (for internal use only).
+ * @returns {*} The scrubbed data.
  */
 WbDataScrumb.prototype.scrubData = function (data, depth) {
     depth = depth || 0;
